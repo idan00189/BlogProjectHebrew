@@ -14,9 +14,12 @@ from sqlalchemy import Table, Column, Integer, ForeignKey
 import smtplib
 from newsdataapi import NewsDataApiClient
 from bs4 import BeautifulSoup
+import os
 
 global DATA
-MY_EMAIL = ""
+MY_EMAIL = os.environ.get("MY_EMAIL")
+MY_EMAIL_PASSWORD = os.environ.get("MY_EMAIL_PASSWORD")
+FLASK_APP_SECRET_KEY=os.environ.get("FLASK_APP_SECRET_KEY")
 
 
 login_manager = LoginManager()
