@@ -23,6 +23,8 @@
   <!-- Custom styles for this template -->
   <link href="{{ url_for('static', filename='css/clean-blog.min.css')}}" rel="stylesheet">
 
+<!--  favion link-->
+  <link rel="icon" type="{{url_for('static',filename='/img/favicon(1).ico')}}" href="/images/favicon.ico">
 </head>
 
 <body>
@@ -32,7 +34,7 @@
     <div class="container">
       <a class="navbar-brand" href="{{url_for('get_all_posts')}}">Idan News</a>
       <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
-        Menu
+        תפריט
         <i class="fas fa-bars"></i>
       </button>
       <div class="collapse navbar-collapse" id="navbarResponsive">

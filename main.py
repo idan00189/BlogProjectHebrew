@@ -12,27 +12,26 @@ from functools import wraps
 from flask import abort,request
 from sqlalchemy import Table, Column, Integer, ForeignKey
 import smtplib
-from newsdataapi import NewsDataApiClient
-from bs4 import BeautifulSoup
 import os
-
 global DATA
+
 MY_EMAIL = os.environ.get("MY_EMAIL")
 MY_EMAIL_PASSWORD = os.environ.get("MY_EMAIL_PASSWORD")
-FLASK_APP_SECRET_KEY=os.environ.get("FLASK_APP_SECRET_KEY")
-
+FLASK_APP_SECRET_KEY = os.environ.get("FLASK_APP_SECRET_KEY")
 
 login_manager = LoginManager()
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get("APP_SECRET_KEY")
+app.config['SECRET_KEY'] = FLASK_APP_SECRET_KEY
 ckeditor = CKEditor(app)
 Bootstrap(app)
 login_manager.init_app(app)
 
 ##CONNECT TO DB
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL")
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL_PG")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+
+
 
 gravatar = Gravatar(app,
                     size=100,
@@ -68,7 +67,7 @@ class BlogPost(db.Model):
     author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     author = relationship("User", back_populates="posts")
 
-    comments = relationship("Comment", back_populates="parent_post")
+    comments = relationship("Comment", back_populates="parent_blog_post")
 
 class Comment(db.Model):
     __tablename__ = "comments"
@@ -78,10 +77,27 @@ class Comment(db.Model):
     author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     comment_author = relationship("User", back_populates="comments")
 
-    post_id = db.Column(db.Integer, db.ForeignKey("blog_posts.id"))
-    parent_post = relationship("BlogPost", back_populates="comments")
+    blog_post_id = db.Column(db.Integer, db.ForeignKey("blog_posts.id"))
+    parent_blog_post = relationship("BlogPost", back_populates="comments")
 
-db.create_all()
+    news_post_id = db.Column(db.Integer, db.ForeignKey("news_posts.id"))
+    parent_news_post = relationship("NewsPost", back_populates="comments")
+
+class NewsPost(db.Model):
+    __tablename__ = "news_posts"
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(250), unique=True, nullable=False)
+    subtitle = db.Column(db.String(250), nullable=False)
+    date = db.Column(db.String(250), nullable=False)
+    body = db.Column(db.Text, nullable=False)
+    img_url = db.Column(db.String(250), nullable=False)
+    category = db.Column(db.String(250), nullable=False)
+    site_name = db.Column(db.String(250), nullable=False)
+
+    comments = relationship("Comment", back_populates="parent_news_post")
+
+# db.create_all()
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -103,8 +119,8 @@ def admin_only(f):
 
 @app.route('/')
 def get_all_posts():
-    posts = BlogPost.query.all()
-    return render_template("index.html", all_posts=posts,error=None)
+    blog_posts = BlogPost.query.all()
+    return render_template("index.html", all_posts=blog_posts,error=None)
 
 
 @app.route('/register',methods=["GET","POST"])
@@ -152,6 +168,7 @@ def login():
     return render_template("login.html",form=form,error=error)
 
 
+
 @app.route('/logout')
 def logout():
     logout_user()
@@ -165,18 +182,18 @@ def show_post(post_id):
     if form.validate_on_submit():
         if current_user.is_authenticated:
             new_comment = Comment(
-                text = form.body.data,
+                text=form.body.data,
                 comment_author=current_user,
-                parent_post=requested_post
+                parent_blog_post=requested_post
             )
             db.session.add(new_comment)
             db.session.commit()
-            return render_template("post.html", post=requested_post, form=form)
+            return render_template("blog-post.html", post=requested_post, form=form)
         else:
             error = "please log in to add comment"
-            return redirect(url_for("login",error=error))
+            return redirect(url_for("login", error=error))
 
-    return render_template("post.html", post=requested_post,form=form)
+    return render_template("blog-post.html", post=requested_post, form=form)
 
 
 @app.route("/about")
@@ -238,6 +255,31 @@ def delete_post(post_id):
     db.session.commit()
     return redirect(url_for('get_all_posts'))
 
+@app.route("/news/technology")
+def show_latest_news():
+    news_posts = NewsPost.query.all()
+    return render_template("news-latest.html", all_posts=news_posts, error=None)
+
+
+@app.route("/news/technology/<int:post_id>",methods=["GET","POST"])
+def show_news_post(post_id):
+    form = CommentForm()
+    requested_post = NewsPost.query.get(post_id)
+    if form.validate_on_submit():
+        if current_user.is_authenticated:
+            new_comment = Comment(
+                text = form.body.data,
+                comment_author=current_user,
+                parent_post=requested_post
+            )
+            db.session.add(new_comment)
+            db.session.commit()
+            return render_template("news-post.html", post=requested_post, form=form)
+        else:
+            error = "please log in to add comment"
+            return redirect(url_for("login",error=error))
+
+    return render_template("blog-post.html", post=requested_post,form=form)
 
 
 
