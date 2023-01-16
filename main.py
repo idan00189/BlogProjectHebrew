@@ -137,7 +137,7 @@ def register():
             db.session.commit()
             return redirect(url_for('login'))
         else:
-            error = "you already sign up with that email, log in instead."
+            error = "האימייל הזה קיים במערכת, התחבר במקום."
             return render_template("register.html",form=form,error = error)
 
     return render_template("register.html",form=form)
@@ -155,14 +155,14 @@ def login():
         password = form.password.data
         user = User.query.filter_by(email=email).first()
         if user is None:
-            error = 'the email does not exist, please try again!'
+            error = 'האימייל לא קיים, בבקשה תנסה שוב.'
             return render_template("login.html", form=form,error=error)
         else:
             if check_password_hash(pwhash=user.password,password=password):
                 login_user(user)
                 return redirect(url_for('get_all_posts'))
             else:
-                error = 'Password incorrect, please try again!'
+                error = 'סיסמא לא נכונה, בבקשה תנסה שוב.'
                 return render_template("login.html", form=form,error=error)
 
     return render_template("login.html",form=form,error=error)
