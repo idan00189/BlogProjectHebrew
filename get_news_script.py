@@ -86,11 +86,17 @@ def upload_to_database():
             subtitle = news['description']
             date = news['pubDate'].split()[0]
             img_url = news['image_url']
-            if img_url ==None:
-                img_url = "https://www.seekpng.com/png/detail/423-4235598_no-image-for-noimage-icon.png"
-            category = news['category'][0]
             site_name = news['source_id']
-            body = web_scraping_news_site(url=news['link'], site_name=site_name,get_img=True if img_url=="https://www.seekpng.com/png/detail/423-4235598_no-image-for-noimage-icon.png" else False)
+            if img_url ==None:
+                web_scraping =web_scraping_news_site(url=news['link'], site_name=site_name, get_img=True)
+                body = web_scraping[0]
+                img_url = web_scraping[1]
+            else:
+                body = web_scraping_news_site(url=news['link'], site_name=site_name, get_img=False)
+            category = news['category'][0]
+
+
+
             if body == None:
                 body="web scraping error:cant load the content for this post"
             new_news_post = NewsPost(
@@ -134,8 +140,9 @@ def web_scraping_news_site(url,site_name,get_img):
         if get_img:
             img = soup.find("div", {"class": "CalcalistArticleTopStoryLinkedImage"}).find('img').get('src')
             print(img)
-
-        return " ".join([str(x) + "<br>" for x in articale])
+            return " ".join([str(x) + "<br>" for x in articale]),img
+        else:
+            return " ".join([str(x) + "<br>" for x in articale])
     else:
         return None
 
