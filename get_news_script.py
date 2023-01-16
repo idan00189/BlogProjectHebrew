@@ -91,7 +91,7 @@ def upload_to_database():
             category = news['category'][0]
             site_name = news['source_id']
             body = web_scraping_news_site(url=news['link'], site_name=site_name)
-            if body ==None:
+            if body == None:
                 body="web scraping error:cant load the content for this post"
             new_news_post = NewsPost(
                 title=title,
@@ -122,7 +122,8 @@ def web_scraping_news_site(url,site_name):
         soup = BeautifulSoup(page.text, "html.parser")
         articale = soup.find("div", {"id": "penci-post-entry-inner"})
         all_p = articale.find_all(name='p')
-        return str(all_p)
+
+        return " ".join([str(x) for x in all_p])
     # else:
     #     return render_template('blog-post.html', id=id, data=DATA, all_p=None)
     # ArticleBodyComponent
@@ -133,7 +134,7 @@ def web_scraping_news_site(url,site_name):
         articale = soup.find("div", {"id": "ArticleBodyComponent"}).find_all('div',
                                                                              {'class': 'text_editor_paragraph rtl'})
 
-        return str(articale)
+        return " ".join([str(x) + "<br>" for x in articale])
     else:
         return None
 

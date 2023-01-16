@@ -255,13 +255,13 @@ def delete_post(post_id):
     db.session.commit()
     return redirect(url_for('get_all_posts'))
 
-@app.route("/news/technology")
+@app.route("/news")
 def show_latest_news():
     news_posts = NewsPost.query.all()
     return render_template("news-latest.html", all_posts=news_posts, error=None)
 
 
-@app.route("/news/technology/<int:post_id>",methods=["GET","POST"])
+@app.route("/news/<int:post_id>",methods=["GET","POST"])
 def show_news_post(post_id):
     form = CommentForm()
     requested_post = NewsPost.query.get(post_id)
@@ -270,7 +270,7 @@ def show_news_post(post_id):
             new_comment = Comment(
                 text = form.body.data,
                 comment_author=current_user,
-                parent_post=requested_post
+                parent_news_post=requested_post
             )
             db.session.add(new_comment)
             db.session.commit()
@@ -279,7 +279,7 @@ def show_news_post(post_id):
             error = "please log in to add comment"
             return redirect(url_for("login",error=error))
 
-    return render_template("blog-post.html", post=requested_post,form=form)
+    return render_template("news-post.html", post=requested_post,form=form)
 
 
 
