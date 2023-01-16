@@ -1,3 +1,5 @@
+import time
+
 import requests
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -7,7 +9,7 @@ import os
 from newsdataapi import NewsDataApiClient
 from bs4 import BeautifulSoup
 from pprint import pprint
-
+import time
 
 FLASK_APP_SECRET_KEY = os.environ.get("FLASK_APP_SECRET_KEY")
 app = Flask(__name__)
@@ -121,8 +123,9 @@ def web_scraping_news_site(url,site_name,get_img):
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
     }
     print(url)
+    page = requests.get(url, headers=my_header)
+    time.sleep(1)
     if site_name == 'tgspot':
-        page = requests.get(url, headers=my_header)
         soup = BeautifulSoup(page.text, "html.parser")
         articale = soup.find("div", {"id": "penci-post-entry-inner"})
         all_p = articale.find_all(name='p')
@@ -132,7 +135,6 @@ def web_scraping_news_site(url,site_name,get_img):
     #     return render_template('blog-post.html', id=id, data=DATA, all_p=None)
     # ArticleBodyComponent
     elif site_name == 'calcalist':
-        page = requests.get(url, headers=my_header)
         soup = BeautifulSoup(page.text, "html.parser")
         articale = soup.find("div", {"id": "ArticleBodyComponent"}).find_all('div',
                                                                              {'class': 'text_editor_paragraph rtl'})
