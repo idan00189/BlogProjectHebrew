@@ -107,13 +107,13 @@ def upload_to_database():
                 category=category,
                 site_name=site_name
             )
-
             db.session.add(new_news_post)
             db.session.commit()
+            print(f"succssed: {new_news_post.title}")
 
         except Exception as e:
             print(e)
-            db.session.close()
+            # db.session.close()
 
 def web_scraping_news_site(url,site_name,get_img):
     my_header = {
@@ -138,7 +138,6 @@ def web_scraping_news_site(url,site_name,get_img):
                                                                              {'class': 'text_editor_paragraph rtl'})
         if get_img:
             img = soup.find("div", {"class": "CalcalistArticleTopStoryLinkedImage"}).find('img').get('src')
-            print(img)
             return " ".join([str(x) + "<br>" for x in articale]),img
         else:
             return " ".join([str(x) + "<br>" for x in articale])
