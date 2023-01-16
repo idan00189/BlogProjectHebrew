@@ -7,7 +7,6 @@ import os
 from newsdataapi import NewsDataApiClient
 from bs4 import BeautifulSoup
 from pprint import pprint
-import time
 
 
 FLASK_APP_SECRET_KEY = os.environ.get("FLASK_APP_SECRET_KEY")
