@@ -113,7 +113,7 @@ def upload_to_database():
 
         except Exception as e:
             print(e)
-            # db.session.close()
+            db.session.close()
 
 def web_scraping_news_site(url,site_name,get_img):
     my_header = {
