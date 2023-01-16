@@ -78,7 +78,7 @@ def upload_to_database():
     api = NewsDataApiClient(apikey=NEWS_API_KEY)
     response = api.news_api(category="technology", language="he")
     results = response['results']
-    pprint(results)
+    pprint(response)
     for news in results:
         description = news['description']
         try:
@@ -87,10 +87,10 @@ def upload_to_database():
             date = news['pubDate'].split()[0]
             img_url = news['image_url']
             if img_url ==None:
-                img_url = "https://www.salonlfc.com/wp-content/uploads/2018/01/image-not-found-1-scaled-1150x647.png"
+                img_url = "https://www.seekpng.com/png/detail/423-4235598_no-image-for-noimage-icon.png"
             category = news['category'][0]
             site_name = news['source_id']
-            body = web_scraping_news_site(url=news['link'], site_name=site_name)
+            body = web_scraping_news_site(url=news['link'], site_name=site_name,get_img=True if img_url=="https://www.seekpng.com/png/detail/423-4235598_no-image-for-noimage-icon.png" else False)
             if body == None:
                 body="web scraping error:cant load the content for this post"
             new_news_post = NewsPost(
@@ -110,7 +110,7 @@ def upload_to_database():
             print(e)
             db.session.close()
 
-def web_scraping_news_site(url,site_name):
+def web_scraping_news_site(url,site_name,get_img):
     my_header = {
         "Accept-Language": "he-IL,he;q=0.9,en-US;q=0.8,en;q=0.7",
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
@@ -118,7 +118,6 @@ def web_scraping_news_site(url,site_name):
     print(url)
     if site_name == 'tgspot':
         page = requests.get(url, headers=my_header)
-        time.sleep(1)
         soup = BeautifulSoup(page.text, "html.parser")
         articale = soup.find("div", {"id": "penci-post-entry-inner"})
         all_p = articale.find_all(name='p')
@@ -129,22 +128,15 @@ def web_scraping_news_site(url,site_name):
     # ArticleBodyComponent
     elif site_name == 'calcalist':
         page = requests.get(url, headers=my_header)
-        time.sleep(1)
         soup = BeautifulSoup(page.text, "html.parser")
         articale = soup.find("div", {"id": "ArticleBodyComponent"}).find_all('div',
                                                                              {'class': 'text_editor_paragraph rtl'})
+        if get_img:
+            img = soup.find("div", {"class": "CalcalistArticleTopStoryLinkedImage"}).find('img').get('src')
+            print(img)
 
         return " ".join([str(x) + "<br>" for x in articale])
     else:
         return None
-
-    # elif site_name == 'walla':
-    #     page = requests.get(url, headers=my_header)
-    #     soup = BeautifulSoup(page.text, "html.parser")
-    #     articale = soup.find("p", {"class": "article_speakable"})
-    #     return render_template('blog-post.html', id=id, data=DATA, all_p=None, aricale=articale)
-    #
-    # else:
-    #     return render_template('blog-post.html', id=id, data=DATA, all_p=None)
 
 upload_to_database()

@@ -42,6 +42,10 @@
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('get_all_posts') }}">ראשי</a>
           </li>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('show_latest_news') }}">חדשות</a>
+          </li>
           {% if current_user.is_authenticated == False %}
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('login') }}">התחברות</a>
@@ -62,7 +66,13 @@
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('contact') }}">יצירת קשר</a>
           </li>
+
         </ul>
       </div>
     </div>
   </nav>
+
+<script>var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'))
+var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+  return new bootstrap.Dropdown(dropdownToggleEl)
+})</script>
