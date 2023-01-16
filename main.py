@@ -86,8 +86,8 @@ class Comment(db.Model):
 class NewsPost(db.Model):
     __tablename__ = "news_posts"
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(250), unique=True, nullable=False)
-    subtitle = db.Column(db.String(250), nullable=False)
+    title = db.Column(db.Text, unique=True, nullable=False)
+    subtitle = db.Column(db.Text, nullable=False)
     date = db.Column(db.String(250), nullable=False)
     body = db.Column(db.Text, nullable=False)
     img_url = db.Column(db.String(250), nullable=False)
