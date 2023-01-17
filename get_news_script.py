@@ -9,6 +9,8 @@ from bs4 import BeautifulSoup
 from pprint import pprint
 import time
 
+
+
 FLASK_APP_SECRET_KEY = os.environ.get("FLASK_APP_SECRET_KEY")
 app = Flask(__name__)
 app.config['SECRET_KEY'] = FLASK_APP_SECRET_KEY
@@ -20,7 +22,7 @@ Session = sessionmaker(app)
 
 
 NEWS_API_KEY = os.environ.get("NEWS_API_KEY")
-
+SCRAPEPOPS_API=os.environ.get("SCRAPEPOPS_API")
 class User(UserMixin, db.Model):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
@@ -107,9 +109,12 @@ def upload_to_database():
                 category=category,
                 site_name=site_name
             )
-            db.session.add(new_news_post)
-            db.session.commit()
-            print(f"succssed: {new_news_post.title}")
+            try:
+                db.session.add(new_news_post)
+                db.session.commit()
+                print(f"succssed: {new_news_post.title}")
+            except:
+                print("this news already exists in the db")
 
         except Exception as e:
             print(e)
@@ -121,10 +126,17 @@ def web_scraping_news_site(url,site_name,get_img):
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
     }
     print(url)
-    page = requests.get(url, headers=my_header)
+    page = requests.get(
+        url='https://proxy.scrapeops.io/v1/',
+        params={
+            'api_key': os.environ.get("SCRAPEPOPS_API"),
+            'url': url,
+            'country': 'il',
+        },
+    )
     time.sleep(1)
     if site_name == 'tgspot':
-        soup = BeautifulSoup(page.text, "html.parser")
+        soup = BeautifulSoup(page.text, "lxml")
         articale = soup.find("div", {"id": "penci-post-entry-inner"})
         all_p = articale.find_all(name='p')
 
@@ -133,7 +145,7 @@ def web_scraping_news_site(url,site_name,get_img):
     #     return render_template('blog-post.html', id=id, data=DATA, all_p=None)
     # ArticleBodyComponent
     elif site_name == 'calcalist':
-        soup = BeautifulSoup(page.text, "html.parser")
+        soup = BeautifulSoup(page.text, "lxml")
         articale = soup.find("div", {"id": "ArticleBodyComponent"}).find_all('div',
                                                                              {'class': 'text_editor_paragraph rtl'})
         if get_img:

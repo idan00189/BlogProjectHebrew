@@ -10,6 +10,7 @@ from forms import CreatePostForm,RegisterForm,LogInForm,CommentForm
 from flask_gravatar import Gravatar
 from functools import wraps
 from flask import abort,request
+from sqlalchemy import desc
 from sqlalchemy import Table, Column, Integer, ForeignKey
 import smtplib
 import os
@@ -264,7 +265,7 @@ def show_latest_news():
 @app.route("/news/<int:post_id>",methods=["GET","POST"])
 def show_news_post(post_id):
     form = CommentForm()
-    requested_post = NewsPost.query.get(post_id)
+    requested_post = NewsPost.query.get(post_id).order_by(desc(NewsPost.id))
     if form.validate_on_submit():
         if current_user.is_authenticated:
             new_comment = Comment(
