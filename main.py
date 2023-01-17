@@ -258,14 +258,14 @@ def delete_post(post_id):
 
 @app.route("/news")
 def show_latest_news():
-    news_posts = NewsPost.query.all()
+    news_posts = NewsPost.query.order_by(desc(NewsPost.id))
     return render_template("news-latest.html", all_posts=news_posts, error=None)
 
 
 @app.route("/news/<int:post_id>",methods=["GET","POST"])
 def show_news_post(post_id):
     form = CommentForm()
-    requested_post = NewsPost.query.get(post_id).order_by(desc(NewsPost.id))
+    requested_post = NewsPost.query.get(post_id)
     if form.validate_on_submit():
         if current_user.is_authenticated:
             new_comment = Comment(
