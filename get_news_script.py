@@ -8,8 +8,7 @@ from newsdataapi import NewsDataApiClient
 from bs4 import BeautifulSoup
 from pprint import pprint
 import time
-
-
+import lxml
 
 FLASK_APP_SECRET_KEY = os.environ.get("FLASK_APP_SECRET_KEY")
 app = Flask(__name__)
@@ -71,11 +70,11 @@ class NewsPost(db.Model):
     img_url = db.Column(db.String(250), nullable=True)
     category = db.Column(db.String(250), nullable=False)
     site_name = db.Column(db.String(250), nullable=True)
-
     comments = relationship("Comment", back_populates="parent_news_post")
 
 # db.create_all()
 def upload_to_database():
+
     api = NewsDataApiClient(apikey=NEWS_API_KEY)
     response = api.news_api(category="technology", language="he")
     results = response['results']
